@@ -7,8 +7,7 @@ CREATE TABLE Author (
     name VARCHAR(100) NOT NULL,
     surname VARCHAR(100) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
-    bio TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+    bio TEXT
 );
 
 -- Create Post table
