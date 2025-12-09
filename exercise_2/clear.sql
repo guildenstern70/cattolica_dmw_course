@@ -1,5 +1,8 @@
-DROP TABLE IF EXISTS Professor;
-DROP TABLE IF EXISTS Course;
-DROP TABLE IF EXISTS Student;
-DROP TABLE IF EXISTS StudyPlan;
-DROP TABLE IF EXISTS Exam;
+-- PostgreSQL script to drop all tables from exercise_2
+
+-- Drop tables in reverse order of dependencies
+DROP TABLE IF EXISTS Exam CASCADE;
+DROP TABLE IF EXISTS StudyPlan CASCADE;
+DROP TABLE IF EXISTS Student CASCADE;
+DROP TABLE IF EXISTS Course CASCADE;
+DROP TABLE IF EXISTS Professor CASCADE;
