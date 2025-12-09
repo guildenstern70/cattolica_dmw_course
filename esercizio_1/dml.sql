@@ -23,3 +23,12 @@ INSERT INTO Books (title, isbn, num_pages, author_id) VALUES
 ('The Metamorphosis', '9780553213690', 201, 6),
 ('Beloved', '9781400033416', 324, 7),
 ('Crime and Punishment', '9780143058144', 671, 8);
+
+-- Query to list all books with author information
+SELECT 
+    a.name AS author_name,
+    a.surname AS author_surname,
+    b.title AS book_title
+FROM Books b
+JOIN Authors a ON b.author_id = a.author_id
+ORDER BY a.surname, a.name, b.title;
