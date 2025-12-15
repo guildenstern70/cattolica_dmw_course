@@ -1,60 +1,56 @@
--- PostgreSQL DDL for a simple Blog website
--- Tables: Author, Post, Comment
+-- PostgreSQL DDL for University Database
 
--- Create Author table
-CREATE TABLE Author (
-    author_id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
+-- Create Professor table
+CREATE TABLE Professor (
+    employee_nr SERIAL PRIMARY KEY,
     surname VARCHAR(100) NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    bio TEXT
+    name VARCHAR(100) NOT NULL
 );
 
--- Create Post table
-CREATE TABLE Post (
-    post_id SERIAL PRIMARY KEY,
-    author_id INTEGER,
+-- Create Course table
+CREATE TABLE Course (
+    cod_course VARCHAR(20) PRIMARY KEY,
+    faculty VARCHAR(100) NOT NULL,
     title VARCHAR(255) NOT NULL,
-    slug VARCHAR(255) NOT NULL UNIQUE,
-    content TEXT NOT NULL,
-    status VARCHAR(20) NOT NULL DEFAULT 'draft', -- e.g. draft, published
-    published_at TIMESTAMP WITH TIME ZONE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
-    CONSTRAINT chk_title_nonempty CHECK (char_length(title) > 0),
-    FOREIGN KEY (author_id) REFERENCES Author(author_id) ON DELETE SET NULL
+    employee_nr INTEGER NOT NULL,
+    FOREIGN KEY (employee_nr) REFERENCES Professor(employee_nr) ON DELETE RESTRICT
 );
 
--- Create Comment table
-CREATE TABLE Comment (
-    comment_id SERIAL PRIMARY KEY,
-    post_id INTEGER NOT NULL,
-    author_name VARCHAR(200) NOT NULL,
-    author_email VARCHAR(255),
-    content TEXT NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
-    is_approved BOOLEAN DEFAULT FALSE,
-    parent_comment_id INTEGER,
-    FOREIGN KEY (post_id) REFERENCES Post(post_id) ON DELETE CASCADE,
-    FOREIGN KEY (parent_comment_id) REFERENCES Comment(comment_id) ON DELETE CASCADE
+-- Create Student table
+CREATE TABLE Student (
+    student_id SERIAL PRIMARY KEY,
+    surname VARCHAR(100) NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    faculty VARCHAR(100) NOT NULL
 );
 
--- Indexes for common queries
-CREATE INDEX idx_post_author ON Post(author_id);
-CREATE INDEX idx_post_status ON Post(status);
-CREATE INDEX idx_post_published_at ON Post(published_at);
-CREATE INDEX idx_comment_post ON Comment(post_id);
-CREATE INDEX idx_comment_parent ON Comment(parent_comment_id);
+-- Create StudyPlan table (many-to-many relationship between Student and Course)
+CREATE TABLE StudyPlan (
+    student_id INTEGER NOT NULL,
+    cod_course VARCHAR(20) NOT NULL,
+    year INTEGER NOT NULL CHECK (year > 0),
+    PRIMARY KEY (student_id, cod_course),
+    FOREIGN KEY (student_id) REFERENCES Student(student_id) ON DELETE CASCADE,
+    FOREIGN KEY (cod_course) REFERENCES Course(cod_course) ON DELETE CASCADE
+);
 
--- Optional: simplified view for published posts (helpful for queries)
-CREATE VIEW PublishedPosts AS
-SELECT p.post_id, p.title, p.slug, p.published_at, a.author_id, a.name, a.surname
-FROM Post p
-LEFT JOIN Author a ON p.author_id = a.author_id
-WHERE p.status = 'published';
+-- Create Exam table
+CREATE TABLE Exam (
+    student_id INTEGER NOT NULL,
+    cod_course VARCHAR(20) NOT NULL,
+    mark INTEGER NOT NULL CHECK (mark >= 0 AND mark <= 30),
+    date DATE NOT NULL,
+    PRIMARY KEY (student_id, cod_course),
+    FOREIGN KEY (student_id) REFERENCES Student(student_id) ON DELETE CASCADE,
+    FOREIGN KEY (cod_course) REFERENCES Course(cod_course) ON DELETE CASCADE
+);
 
--- Notes:
--- - `Author` stores blog authors. Deleting an author sets `Post.author_id` to NULL so posts remain available.
--- - `Post` stores posts with a unique `slug` for friendly URLs.
--- - `Comment` references `Post` and supports nested comments via `parent_comment_id`.
--- - Use transactions and proper application-level validation when inserting/updating (e.g., ensure slug uniqueness, sanitize HTML in content/comments).
+-- Create indexes for better query performance
+CREATE INDEX idx_course_employee ON Course(employee_nr);
+CREATE INDEX idx_course_faculty ON Course(faculty);
+CREATE INDEX idx_student_faculty ON Student(faculty);
+CREATE INDEX idx_studyplan_student ON StudyPlan(student_id);
+CREATE INDEX idx_studyplan_course ON StudyPlan(cod_course);
+CREATE INDEX idx_exam_student ON Exam(student_id);
+CREATE INDEX idx_exam_course ON Exam(cod_course);
+CREATE INDEX idx_exam_date ON Exam(date);

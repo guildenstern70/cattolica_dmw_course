@@ -1,128 +1,46 @@
--- PostgreSQL DML for Music Database
-
--- Insert Tracks
-INSERT INTO TRACK (song_title, year) VALUES
--- Album 1 tracks
-('Bohemian Rhapsody', 1975),
-('You''re My Best Friend', 1975),
-('39', 1975),
-('Sweet Lady', 1975),
-('Seaside Rendezvous', 1975),
-('The Prophet''s Song', 1975),
-('Love of My Life', 1975),
--- Album 2 tracks
-('Come Together', 1969),
-('Something', 1969),
-('Maxwell''s Silver Hammer', 1969),
-('Oh! Darling', 1969),
-('Octopus''s Garden', 1969),
-('I Want You (She''s So Heavy)', 1969),
-('Here Comes the Sun', 1969),
--- Album 3 tracks
-('Thriller', 1982),
-('Beat It', 1982),
-('Billie Jean', 1982),
-('Wanna Be Startin'' Somethin''', 1982),
-('Baby Be Mine', 1982),
-('The Girl Is Mine', 1982),
-('Human Nature', 1982);
-
--- Insert Albums
-INSERT INTO ALBUM (title, year, price) VALUES
-('A Night at the Opera', 1975, 19.99),
-('Abbey Road', 1969, 24.99),
-('Thriller', 1982, 22.99);
-
--- Insert Album Content (linking tracks to albums with progressive numbers)
-INSERT INTO ALBUM_CONTENT (album_id, track_cod, prog_num) VALUES
--- Album 1: A Night at the Opera
-(1, 1, 1),
-(1, 2, 2),
-(1, 3, 3),
-(1, 4, 4),
-(1, 5, 5),
-(1, 6, 6),
-(1, 7, 7),
--- Album 2: Abbey Road
-(2, 8, 1),
-(2, 9, 2),
-(2, 10, 3),
-(2, 11, 4),
-(2, 12, 5),
-(2, 13, 6),
-(2, 14, 7),
--- Album 3: Thriller
-(3, 15, 1),
-(3, 16, 2),
-(3, 17, 3),
-(3, 18, 4),
-(3, 19, 5),
-(3, 20, 6),
-(3, 21, 7);
+-- PostgreSQL DML for Blog Database
 
 -- Insert Authors
-INSERT INTO AUTHOR_SONG (author, title) VALUES
--- Queen songs
-('Freddie Mercury', 'Bohemian Rhapsody'),
-('John Deacon', 'You''re My Best Friend'),
-('Brian May', '39'),
-('Brian May', 'Sweet Lady'),
-('Freddie Mercury', 'Seaside Rendezvous'),
-('Brian May', 'The Prophet''s Song'),
-('Freddie Mercury', 'Love of My Life'),
--- Beatles songs
-('John Lennon', 'Come Together'),
-('George Harrison', 'Something'),
-('Paul McCartney', 'Maxwell''s Silver Hammer'),
-('Paul McCartney', 'Oh! Darling'),
-('Ringo Starr', 'Octopus''s Garden'),
-('John Lennon', 'I Want You (She''s So Heavy)'),
-('George Harrison', 'Here Comes the Sun'),
--- Michael Jackson songs
-('Michael Jackson', 'Thriller'),
-('Michael Jackson', 'Beat It'),
-('Michael Jackson', 'Billie Jean'),
-('Michael Jackson', 'Wanna Be Startin'' Somethin'''),
-('Rod Temperton', 'Baby Be Mine'),
-('Paul McCartney', 'The Girl Is Mine'),
-('Steve Porcaro', 'Human Nature');
+INSERT INTO Author (name, surname, email, bio) VALUES
+('Marco', 'Rossi', 'marco.rossi@example.com', 'Technical writer and developer.'),
+('Laura', 'Bianchi', 'laura.bianchi@example.com', 'Lifestyle and travel blogger.');
 
--- Insert Singers
-INSERT INTO SINGER_TRACK (singer_name, track_cod) VALUES
--- Queen
-('Freddie Mercury', 1),
-('Freddie Mercury', 2),
-('Brian May', 3),
-('Freddie Mercury', 4),
-('Freddie Mercury', 5),
-('Brian May', 6),
-('Freddie Mercury', 7),
--- Beatles
-('The Beatles', 8),
-('The Beatles', 9),
-('The Beatles', 10),
-('The Beatles', 11),
-('The Beatles', 12),
-('The Beatles', 13),
-('The Beatles', 14),
--- Michael Jackson
-('Michael Jackson', 15),
-('Michael Jackson', 16),
-('Michael Jackson', 17),
-('Michael Jackson', 18),
-('Michael Jackson', 19),
-('Michael Jackson', 20),
-('Michael Jackson', 21);
+-- Insert Posts (3 posts)
+INSERT INTO Post (author_id, title, slug, content, status, published_at) VALUES
+(1, 'Introducing Our New Project', 'introducing-our-new-project', 'This is the content of the first post. It presents our new project and goals.', 'published', now() - INTERVAL '10 days'),
+(1, 'Deep Dive: Architecture', 'deep-dive-architecture', 'A technical deep dive into the architecture used for the project.', 'published', now() - INTERVAL '7 days'),
+(2, 'Travel Tips for 2025', 'travel-tips-2025', 'Practical travel tips and packing checklists for 2025 trips.', 'published', now() - INTERVAL '3 days');
 
--- Query to show the first album with its tracks
-SELECT 
-    a.title AS album_title,
-    t.id AS song_id,
-    t.song_title AS song_name,
-    st.singer_name AS singer
-FROM ALBUM a
-JOIN ALBUM_CONTENT ac ON a.id = ac.album_id
-JOIN TRACK t ON ac.track_cod = t.id
-JOIN SINGER_TRACK st ON t.id = st.track_cod
-WHERE a.id = 1
-ORDER BY ac.prog_num;
+-- Insert Comments (2 comments per post)
+INSERT INTO Comment (post_id, author_name, author_email, content, created_at, is_approved) VALUES
+-- Comments for Post 1
+(1, 'Giovanni', 'giovanni@example.com', 'Great introduction! Looking forward to updates.', now() - INTERVAL '9 days', TRUE),
+(1, 'Anna', 'anna@example.com', 'Nice overview — can you share more about timeline?', now() - INTERVAL '8 days', TRUE),
+-- Comments for Post 2
+(2, 'Paolo', 'paolo@example.com', 'Excellent technical explanation.', now() - INTERVAL '6 days', TRUE),
+(2, 'Sara', 'sara@example.com', 'Could you provide a sample repo link?', now() - INTERVAL '5 days', FALSE),
+-- Comments for Post 3
+(3, 'Luca', 'luca@example.com', 'These tips are very useful, thanks!', now() - INTERVAL '2 days', TRUE),
+(3, 'Chiara', 'chiara@example.com', 'Would love more details on budget travel.', now() - INTERVAL '1 day', FALSE);
+
+
+-- SELECT first post with its comments
+SELECT
+  p.post_id,
+  p.title AS post_title,
+  p.slug AS post_slug,
+  p.content AS post_content,
+  p.published_at,
+  a.name  AS author_name,
+  a.surname AS author_surname,
+  c.comment_id,
+  c.author_name AS comment_author,
+  c.author_email AS comment_email,
+  c.content AS comment_content,
+  c.created_at AS comment_created_at,
+  c.is_approved
+FROM Post p
+LEFT JOIN Author a ON p.author_id = a.author_id
+LEFT JOIN Comment c ON p.post_id = c.post_id
+WHERE p.post_id = 1
+ORDER BY c.created_at;

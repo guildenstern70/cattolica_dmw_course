@@ -1,46 +1,87 @@
--- PostgreSQL DML for Blog Database
+-- PostgreSQL DML for University Database
 
--- Insert Authors
-INSERT INTO Author (name, surname, email, bio) VALUES
-('Marco', 'Rossi', 'marco.rossi@example.com', 'Technical writer and developer.'),
-('Laura', 'Bianchi', 'laura.bianchi@example.com', 'Lifestyle and travel blogger.');
+-- Insert Professors
+INSERT INTO Professor (surname, name) VALUES
+('Rossi', 'Marco'),
+('Bianchi', 'Laura'),
+('Verdi', 'Giuseppe'),
+('Neri', 'Anna'),
+('Ferrari', 'Paolo');
 
--- Insert Posts (3 posts)
-INSERT INTO Post (author_id, title, slug, content, status, published_at) VALUES
-(1, 'Introducing Our New Project', 'introducing-our-new-project', 'This is the content of the first post. It presents our new project and goals.', 'published', now() - INTERVAL '10 days'),
-(1, 'Deep Dive: Architecture', 'deep-dive-architecture', 'A technical deep dive into the architecture used for the project.', 'published', now() - INTERVAL '7 days'),
-(2, 'Travel Tips for 2025', 'travel-tips-2025', 'Practical travel tips and packing checklists for 2025 trips.', 'published', now() - INTERVAL '3 days');
+-- Insert Courses
+INSERT INTO Course (cod_course, faculty, title, employee_nr) VALUES
+('CS101', 'Computer Science', 'Introduction to Programming', 1),
+('CS201', 'Computer Science', 'Data Structures and Algorithms', 1),
+('MATH101', 'Mathematics', 'Calculus I', 2),
+('PHYS101', 'Physics', 'General Physics', 3),
+('ENG101', 'Engineering', 'Engineering Fundamentals', 4),
+('CS301', 'Computer Science', 'Database Systems', 5);
 
--- Insert Comments (2 comments per post)
-INSERT INTO Comment (post_id, author_name, author_email, content, created_at, is_approved) VALUES
--- Comments for Post 1
-(1, 'Giovanni', 'giovanni@example.com', 'Great introduction! Looking forward to updates.', now() - INTERVAL '9 days', TRUE),
-(1, 'Anna', 'anna@example.com', 'Nice overview — can you share more about timeline?', now() - INTERVAL '8 days', TRUE),
--- Comments for Post 2
-(2, 'Paolo', 'paolo@example.com', 'Excellent technical explanation.', now() - INTERVAL '6 days', TRUE),
-(2, 'Sara', 'sara@example.com', 'Could you provide a sample repo link?', now() - INTERVAL '5 days', FALSE),
--- Comments for Post 3
-(3, 'Luca', 'luca@example.com', 'These tips are very useful, thanks!', now() - INTERVAL '2 days', TRUE),
-(3, 'Chiara', 'chiara@example.com', 'Would love more details on budget travel.', now() - INTERVAL '1 day', FALSE);
+-- Insert Students
+INSERT INTO Student (surname, name, faculty) VALUES
+('Colombo', 'Giovanni', 'Computer Science'),
+('Ricci', 'Maria', 'Computer Science'),
+('Russo', 'Alessandro', 'Engineering'),
+('Marino', 'Sofia', 'Mathematics'),
+('Bruno', 'Luca', 'Computer Science'),
+('Greco', 'Chiara', 'Physics');
 
+-- Insert Study Plans (students enrolled in courses)
+INSERT INTO StudyPlan (student_id, cod_course, year) VALUES
+-- Giovanni Colombo
+(1, 'CS101', 1),
+(1, 'CS201', 1),
+(1, 'MATH101', 1),
+-- Maria Ricci
+(2, 'CS101', 1),
+(2, 'CS301', 2),
+(2, 'MATH101', 1),
+-- Alessandro Russo
+(3, 'ENG101', 1),
+(3, 'PHYS101', 1),
+(3, 'MATH101', 1),
+-- Sofia Marino
+(4, 'MATH101', 1),
+(4, 'PHYS101', 1),
+(4, 'CS101', 2),
+-- Luca Bruno
+(5, 'CS101', 1),
+(5, 'CS201', 1),
+(5, 'CS301', 2),
+-- Chiara Greco
+(6, 'PHYS101', 1),
+(6, 'MATH101', 1),
+(6, 'CS101', 2);
 
--- SELECT first post with its comments
-SELECT
-  p.post_id,
-  p.title AS post_title,
-  p.slug AS post_slug,
-  p.content AS post_content,
-  p.published_at,
-  a.name  AS author_name,
-  a.surname AS author_surname,
-  c.comment_id,
-  c.author_name AS comment_author,
-  c.author_email AS comment_email,
-  c.content AS comment_content,
-  c.created_at AS comment_created_at,
-  c.is_approved
-FROM Post p
-LEFT JOIN Author a ON p.author_id = a.author_id
-LEFT JOIN Comment c ON p.post_id = c.post_id
-WHERE p.post_id = 1
-ORDER BY c.created_at;
+-- Insert Exams (completed courses with marks)
+INSERT INTO Exam (student_id, cod_course, mark, date) VALUES
+-- Giovanni Colombo
+(1, 'CS101', 28, '2024-06-15'),
+(1, 'MATH101', 25, '2024-07-10'),
+-- Maria Ricci
+(2, 'CS101', 30, '2024-06-15'),
+(2, 'MATH101', 27, '2024-07-10'),
+-- Alessandro Russo
+(3, 'ENG101', 26, '2024-06-20'),
+(3, 'PHYS101', 24, '2024-07-05'),
+-- Sofia Marino
+(4, 'MATH101', 30, '2024-07-10'),
+-- Luca Bruno
+(5, 'CS101', 29, '2024-06-15'),
+-- Chiara Greco
+(6, 'PHYS101', 27, '2024-07-05');
+
+-- Query to list the study plan of the first student
+SELECT 
+    s.name AS student_name,
+    s.surname AS student_surname,
+    c.title AS course_name,
+    c.cod_course AS course_code,
+    p.name AS professor_name,
+    p.surname AS professor_surname
+FROM StudyPlan sp
+JOIN Student s ON sp.student_id = s.student_id
+JOIN Course c ON sp.cod_course = c.cod_course
+JOIN Professor p ON c.employee_nr = p.employee_nr
+WHERE s.student_id = 1
+ORDER BY sp.year, c.title;
